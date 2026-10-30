@@ -1,0 +1,2 @@
+{"_note":"SESSGUARD-FAKE-FIXTURE: synthetic demo file. Contains no real credentials.","type":"user","message":{"role":"user","content":"refactor the auth module"}}
+{"_note":"SESSGUARD-FAKE-FIXTURE: synthetic demo file. Contains no real credentials.","type":"assistant","message":{"role":"assistant","content":"done"}}

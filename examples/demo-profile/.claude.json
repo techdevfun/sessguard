@@ -1,0 +1,1 @@
+{"_note":"SESSGUARD-FAKE-FIXTURE: synthetic demo file. Contains no real credentials. Used by tests and the demo.","oauth":{"accessToken":"SESSGUARD-FAKE-sk-ant-oat-2w8Er5tYu9iOp4aSd7fG","refreshToken":"SESSGUARD-FAKE-sk-ant-ort-6h2Jk8lZm4xCv9bNq3wE"},"projects":{"/home/demo/myapp":{"allowedTools":["Read","Bash"]}}}

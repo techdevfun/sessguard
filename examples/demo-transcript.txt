@@ -1,0 +1,70 @@
+demo@sessguard:~$ node dist/cli.js --version
+
+sessguard 0.1.0
+demo@sessguard:~$ SESSGUARD_ROOT=examples/demo-profile node dist/cli.js inventory
+
+AI SESSION STORES ON THIS MACHINE
+Token values are never shown -- paths, file metadata, and match counts only.
+
+Apps with stores found: 6/10
+
+- Claude Code / Claude CLI:
+    stores: .claude.json, .claude
+    files: 2, total size: 634 bytes
+    newest: today, oldest: today
+    files matching token patterns: 1 (6 matches -- values hidden)
+- ChatGPT Desktop: not found
+- Codex CLI:
+    stores: .codex/auth.json, .codex
+    files: 2, total size: 378 bytes
+    newest: today, oldest: today
+    files matching token patterns: 1 (6 matches -- values hidden)
+- Cursor:
+    stores: .cursor
+    files: 1, total size: 231 bytes
+    newest: today, oldest: today
+    files matching token patterns: 1 (2 matches -- values hidden)
+- Windsurf:
+    stores: .windsurf
+    files: 1, total size: 153 bytes
+    newest: today, oldest: today
+    files matching token patterns: 0 (0 matches -- values hidden)
+- GitHub Copilot (IDE + CLI):
+    stores: .config/github-copilot
+    files: 1, total size: 213 bytes
+    newest: today, oldest: today
+    files matching token patterns: 1 (3 matches -- values hidden)
+- Gemini CLI:
+    stores: .gemini
+    files: 1, total size: 208 bytes
+    newest: today, oldest: today
+    files matching token patterns: 1 (2 matches -- values hidden)
+- Amazon Q: not found
+- Kiro: not found
+- JetBrains AI Assistant: not found
+demo@sessguard:~$ SESSGUARD_ROOT=examples/demo-profile node dist/cli.js checklist | head -24
+
+REVOCATION CHECKLIST
+For each app with session material found on this machine.
+
+## Claude Code / Claude CLI
+Stores: .claude.json, .claude
+Typically holds: API keys, OAuth session tokens, project session transcripts
+Revoke: https://console.anthropic.com/settings/keys
+How: Revoke API keys at the console. For OAuth sessions, sign out inside the app as well.
+Also rotate: Any API keys you used with Claude Code
+
+## ChatGPT Desktop (not found on this machine)
+No local stores found -- nothing to revoke locally.
+If you used it elsewhere, revoke at: https://chatgpt.com
+
+## Codex CLI
+Stores: .codex/auth.json, .codex
+Typically holds: API keys, OAuth tokens, session state
+Revoke: https://platform.openai.com/account/api-keys
+How: Revoke API keys here. If you signed in with ChatGPT, also log out all sessions at chatgpt.com.
+Also rotate: OpenAI API keys used with Codex
+
+## Cursor
+Stores: .cursor
+Typically holds: API keys, account session tokens

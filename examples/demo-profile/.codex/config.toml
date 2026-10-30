@@ -1,0 +1,3 @@
+# SESSGUARD-FAKE-FIXTURE: synthetic demo file. Contains no real credentials.
+model = "gpt-5"
+approval_policy = "on-request"
