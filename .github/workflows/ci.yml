@@ -36,6 +36,17 @@ jobs:
       - name: Redaction self-test (fixture secrets must never reach JSON output)
         run: npm run selftest
 
-      - name: Prove zero network calls (run with networking disabled)
+      - name: Prove zero network calls (run with external networking blocked)
         run: |
-          unshare -rn -- bash -c "SESSGUARD_ROOT=$PWD/examples/demo-profile node dist/cli.js inventory --json /tmp/sg-net-inv.json && SESSGUARD_ROOT=$PWD/examples/demo-profile node dist/cli.js checklist --json /tmp/sg-net-chk.json && node dist/cli.js --version"
+          # Block all non-loopback traffic. REJECT (not DROP) fails any
+          # attempted connection immediately instead of hanging, so a
+          # network-dependent command would error here, not stall.
+          sudo iptables -A OUTPUT -d 127.0.0.0/8 -j ACCEPT
+          sudo iptables -A OUTPUT -j REJECT
+          sudo ip6tables -A OUTPUT -d ::1/128 -j ACCEPT 2>/dev/null || true
+          sudo ip6tables -A OUTPUT -j REJECT 2>/dev/null || true
+          # shellcheck disable=SC2064
+          trap "sudo iptables -D OUTPUT -j REJECT; sudo iptables -D OUTPUT -d 127.0.0.0/8 -j ACCEPT" EXIT
+          SESSGUARD_ROOT=$PWD/examples/demo-profile node dist/cli.js inventory --json /tmp/sg-net-inv.json
+          SESSGUARD_ROOT=$PWD/examples/demo-profile node dist/cli.js checklist --json /tmp/sg-net-chk.json
+          node dist/cli.js --version
