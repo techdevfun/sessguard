@@ -101,7 +101,7 @@ Curated, dated paths -- apps move their storage locations, so each entry carries
 
 - **TypeScript, zero runtime dependencies**, Node.js 20+.
 - **Read-only:** the scanner never writes, follows no symlinks, and reads at most 2 MB per file.
-- **Zero network:** no HTTP imports, no `fetch`, no sockets. CI runs the full suite with networking disabled (`unshare -rn`) and a static test asserts no networking API exists in `src/`.
+- **Zero network:** no HTTP imports, no `fetch`, no sockets. CI runs the full suite with outbound networking blocked (iptables REJECT isolation on the runner) and a static test asserts no networking API exists in `src/`.
 - **No values, ever:** `countTokenPatterns` returns a number only; findings carry paths, sizes, mtimes, and counts. The redaction self-test (`npm run selftest`, also in CI) plants fake secrets in the demo profile and fails the build if any of them reaches the JSON output.
 
 ## Development
