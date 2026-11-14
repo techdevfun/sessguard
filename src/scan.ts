@@ -72,10 +72,13 @@ function looksBinary(buf: Buffer): boolean {
 export function scanFile(absPath: string, displayRoot: string): FileFinding | null {
   let st: fs.Stats;
   try {
-    st = fs.statSync(absPath);
+    // lstat, not stat: a symlinked file must never be read through, so the
+    // scanner only ever sees files that really live under the scanned root.
+    st = fs.lstatSync(absPath);
   } catch {
     return null;
   }
+  if (st.isSymbolicLink()) return null;
   if (!st.isFile()) return null;
   let matches = 0;
   try {
@@ -131,10 +134,13 @@ export function scanApp(app: AppEntry, homeDir: string, platform: Platform): App
     const abs = path.join(homeDir, ...store.segments);
     let st: fs.Stats;
     try {
-      st = fs.statSync(abs);
+      // lstat, not stat: a symlinked store must be skipped, never followed --
+      // the scanner promises to follow no symlinks (see README Design).
+      st = fs.lstatSync(abs);
     } catch {
       continue; // store absent: app (or that store) not installed here
     }
+    if (st.isSymbolicLink()) continue; // symlinked store: skip, do not report
     storePaths.push(path.relative(homeDir, abs) || '.');
     if (st.isDirectory()) {
       walkDir(abs, homeDir, files);
