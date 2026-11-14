@@ -1,4 +1,4 @@
-import { describe, it, before, after } from 'node:test';
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
@@ -83,5 +83,63 @@ describe('scanner', () => {
   it('scanFile returns metadata for unreadable paths as null, never throws', () => {
     const f = scanFile(path.join(home, '.does-not-exist.json'), home);
     assert.equal(f, null);
+  });
+});
+
+describe('symlink handling (README: scanner follows no symlinks)', () => {
+  let home: string;
+  let target: string;
+
+  before(() => {
+    target = fs.mkdtempSync(path.join(os.tmpdir(), 'sessguard-symlink-target-'));
+    // Real files live OUTSIDE the scanned root, reachable only via symlink.
+    fs.writeFileSync(
+      path.join(target, 'session.json'),
+      `{"oauth_token":"fake-oauth-token-abcdef0123456789"}`,
+      'utf8',
+    );
+    fs.writeFileSync(
+      path.join(target, 'auth.json'),
+      `{"api_key":"fake-sk-value-0123456789abcdef"}`,
+      'utf8',
+    );
+  });
+
+  beforeEach(() => {
+    home = fs.mkdtempSync(path.join(os.tmpdir(), 'sessguard-symlink-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(home, { recursive: true, force: true });
+  });
+
+  after(() => {
+    fs.rmSync(target, { recursive: true, force: true });
+  });
+
+  it('does not follow a symlinked store directory', () => {
+    fs.symlinkSync(target, path.join(home, '.claude'));
+    const results = scanAll(APPS, home, 'linux');
+    const claude = results.find((r) => r.appId === 'claude');
+    assert.ok(claude);
+    assert.equal(claude.found, false, 'symlinked .claude must not be reported as found');
+    assert.equal(claude.fileCount, 0, 'no files outside the scanned root may be inventoried');
+    assert.deepEqual(claude.storePaths, []);
+  });
+
+  it('does not follow a symlinked store file', () => {
+    fs.symlinkSync(path.join(target, 'auth.json'), path.join(home, '.claude.json'));
+    const results = scanAll(APPS, home, 'linux');
+    const claude = results.find((r) => r.appId === 'claude');
+    assert.ok(claude);
+    assert.equal(claude.found, false, 'symlinked .claude.json must not be reported as found');
+    assert.equal(claude.fileCount, 0);
+    assert.equal(claude.tokenPatternMatchCount, 0, 'no pattern counts from outside the root');
+  });
+
+  it('scanFile returns null for a symlinked file, never reads through it', () => {
+    const link = path.join(home, '.claude.json');
+    fs.symlinkSync(path.join(target, 'auth.json'), link);
+    assert.equal(scanFile(link, home), null);
   });
 });
